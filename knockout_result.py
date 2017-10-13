@@ -71,15 +71,17 @@ def com(names):
     # 产生比赛对.
     from itertools import combinations
     # return combinations(names, 2)
-    coms = [('SKT', 'C9'), 
-        ('SKT', 'AHQ'), 
-        ('SKT', 'EDG'), 
-        ('C9', 'AHQ'), 
-        ('C9', 'EDG'), 
-        ('AHQ', 'EDG')]
+    coms = [
+        #('SSG', 'FB'), 
+        ('SSG', 'G2'),
+        ('FB', 'RNG'), 
+        ('FB', 'G2'), 
+        ('RNG', 'SSG'), 
+        ]
     return coms
 
-def predict(names, scores, coms, predict_team, n=2):
+def predict(names, scores, coms, predict_team, n=2, tag="win"):
+    print("predict {}:\n".format(tag))
     match = Match(names, scores)
     matchs = defaultdict(lambda : [])
     matchs[match] = []
@@ -94,23 +96,31 @@ def predict(names, scores, coms, predict_team, n=2):
             matchs[tmp].append("{} > {}".format(name2, name1))
     idx = 1
     for m, winteams in matchs.items():
-        # 预测某队在所有比赛结束后积分居前n名的可能性
-        if predict_team in m.top(n):
+        res = m.top(n)
+        if tag == "win":
+            # 预测某队在所有比赛结束后积分居前n名的可能性
+            res = res
+        elif tag == "loss":
+            res = set([i.name for i in m.teams]) - set(res)
+        else:
+            res = []
+        if predict_team in res:
             print "可能性: {}".format(idx)
             idx += 1
-            print m
+            print str(m).strip()
             for wt in winteams:
                 print wt
             print
 def main():
     # 对名
-    names = ["SKT", "C9", "AHQ", "EDG"]
+    names = ["RNG", "SSG", "G2", "FB"]
     # 目前积分
-    scores = [3, 2, 1, 0]
+    scores = [3, 3, 2, 0]
     coms = com(names)
-    predict_team = "EDG"
+    predict_team = "RNG"
     n = 2
-    predict(names, scores, coms, predict_team, n=2)
+    predict(names, scores, coms, predict_team, n=2, tag="win")
+    predict(names, scores, coms, predict_team, n=2, tag="loss")
 
 if __name__ == '__main__':
     main()
